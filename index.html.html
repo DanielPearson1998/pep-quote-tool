@@ -9,139 +9,92 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
-    --navy: #042C53;
-    --navy-mid: #185FA5;
-    --navy-light: #E6F1FB;
-    --green: #2D7A3A;
-    --green-light: #EAF3DE;
-    --amber: #633806;
-    --amber-light: #FAEEDA;
-    --amber-border: #FAC775;
-    --red: #991B1B;
-    --red-light: #FEF2F2;
-    --red-border: #FECACA;
-    --text: #0F1923;
-    --text-mid: #4B5563;
-    --text-soft: #9CA3AF;
-    --border: #E5E7EB;
-    --border-mid: #D1D5DB;
-    --bg: #F8F9FA;
-    --surface: #FFFFFF;
-    --radius: 8px;
-    --radius-lg: 12px;
+    --navy:#042C53;--navy-mid:#185FA5;--navy-light:#E6F1FB;
+    --green:#2D7A3A;--green-light:#EAF3DE;
+    --amber:#633806;--amber-light:#FAEEDA;--amber-border:#FAC775;
+    --red:#991B1B;--red-light:#FEF2F2;--red-border:#FECACA;
+    --text:#0F1923;--text-mid:#4B5563;--text-soft:#9CA3AF;
+    --border:#E5E7EB;--border-mid:#D1D5DB;
+    --bg:#F8F9FA;--surface:#FFFFFF;
+    --radius:8px;--radius-lg:12px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-  
-  /* Header */
-  .header { background: var(--navy); padding: 0 2rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-  .header-logo { display: flex; align-items: center; gap: 10px; }
-  .header-logo-mark { width: 28px; height: 28px; background: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-  .header-logo-mark span { font-weight: 600; font-size: 13px; color: var(--navy); letter-spacing: -0.5px; }
-  .header-title { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.9); letter-spacing: 0.01em; }
-  .header-date { font-size: 12px; color: rgba(255,255,255,0.5); font-family: 'DM Mono', monospace; }
-
-  /* Layout */
-  .main { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
-
-  /* Steps */
-  .step { margin-bottom: 2rem; }
-  .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
-  .step-num { width: 26px; height: 26px; border-radius: 50%; background: var(--border); border: 1.5px solid var(--border-mid); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--text-soft); flex-shrink: 0; transition: all 0.2s; }
-  .step-num.active { background: var(--navy); color: #fff; border-color: var(--navy); }
-  .step-num.done { background: var(--green-light); color: var(--green); border-color: #86EFAC; }
-  .step-num.done::before { content: '✓'; font-size: 11px; }
-  .step-num.done span { display: none; }
-  .step-title { font-size: 15px; font-weight: 600; color: var(--text); }
-  .step-body { margin-left: 38px; }
-
-  /* Drop zones */
-  .drop-zone { border: 1.5px dashed var(--border-mid); border-radius: var(--radius-lg); padding: 2.5rem 2rem; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--surface); }
-  .drop-zone:hover, .drop-zone.over { background: var(--navy-light); border-color: var(--navy-mid); border-style: solid; }
-  .drop-zone.success { background: var(--green-light); border-color: #86EFAC; border-style: solid; cursor: default; }
-  .drop-zone.fail { background: var(--red-light); border-color: var(--red-border); border-style: solid; cursor: pointer; }
-  .dz-icon { font-size: 28px; margin-bottom: 8px; }
-  .dz-main { font-size: 14px; font-weight: 500; color: var(--text-mid); }
-  .dz-sub { font-size: 12px; color: var(--text-soft); margin-top: 4px; }
-  .dz-link { color: var(--navy-mid); text-decoration: underline; }
-  .dz-success { font-size: 14px; font-weight: 500; color: var(--green); }
-  .dz-fail { font-size: 13px; color: var(--red); }
-
-  /* Meter cards */
-  .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-soft); margin-bottom: 8px; }
-  .meter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .meter-card { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; transition: all 0.15s; background: var(--surface); }
-  .meter-card:hover { border-color: var(--navy-mid); background: var(--navy-light); }
-  .meter-card.sel { border-color: var(--navy-mid); background: var(--navy-light); box-shadow: 0 0 0 3px rgba(24,95,165,0.15); }
-  .mc-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-soft); margin-bottom: 2px; }
-  .mc-id { font-size: 13px; font-weight: 600; color: var(--text); font-family: 'DM Mono', monospace; }
-  .mc-site { font-size: 12px; color: var(--text-mid); margin-top: 2px; }
-  .tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-top: 6px; }
-  .tag-e { background: var(--navy-light); color: var(--navy-mid); }
-  .tag-g { background: var(--green-light); color: var(--green); }
-
-  /* Buttons */
-  .btn-primary { padding: 9px 20px; background: var(--navy); color: #fff; border: none; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
-  .btn-primary:hover { opacity: 0.88; }
-  .btn-block { display: block; width: 100%; padding: 13px; font-size: 14px; }
-
-  /* Summary */
-  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; }
-  .summary-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; padding: 3px 0; gap: 16px; }
-  .summary-row .sr-label { color: var(--text-soft); flex-shrink: 0; }
-  .summary-row .sr-val { font-weight: 500; color: var(--text); text-align: right; }
-  .mono { font-family: 'DM Mono', monospace; font-size: 12px; }
-
-  /* Supplier cards */
-  .supplier-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 10px; }
-  .sc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .sc-name { font-size: 13px; font-weight: 600; color: var(--text); }
-  .sc-meta { font-size: 11px; color: var(--text-soft); font-family: 'DM Mono', monospace; }
-  .flag { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-border); margin-bottom: 4px; display: inline-block; margin-right: 4px; }
-
-  /* Supplier drop zone (compact) */
-  .sup-drop { border: 1.5px dashed var(--border-mid); border-radius: var(--radius); padding: 10px 14px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-mid); }
-  .sup-drop:hover, .sup-drop.over { background: var(--navy-light); border-color: var(--navy-mid); }
-  .sup-drop.success { background: var(--green-light); border-color: #86EFAC; border-style: solid; cursor: default; color: var(--green); }
-  .sup-drop.fail { background: var(--red-light); border-color: var(--red-border); border-style: solid; color: var(--red); cursor: pointer; }
-  .sup-drop-icon { font-size: 16px; flex-shrink: 0; }
-  .sup-drop-text { flex: 1; }
-  .sup-drop-type { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-soft); }
-  .sup-drop.success .sup-drop-type { color: var(--green); opacity: 0.7; }
-
-  /* Parsed rates */
-  .rates-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
-  .rate-chip { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; }
-  .rc-label { font-size: 10px; color: var(--text-soft); margin-bottom: 2px; }
-  .rc-val { font-size: 12px; font-weight: 600; color: var(--text); font-family: 'DM Mono', monospace; }
-  .term-pill { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--navy); color: #fff; margin: 6px 4px 4px 0; }
-
-  /* Divider */
-  hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  .header{background:var(--navy);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .header-logo{display:flex;align-items:center;gap:10px;}
+  .logo-mark{width:28px;height:28px;background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:var(--navy);letter-spacing:-0.5px;}
+  .header-title{font-size:14px;font-weight:500;color:rgba(255,255,255,0.9);}
+  .header-date{font-size:12px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace;}
+  .main{max-width:760px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+  .step{margin-bottom:2rem;}
+  .step-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;}
+  .step-num{width:26px;height:26px;border-radius:50%;background:var(--border);border:1.5px solid var(--border-mid);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text-soft);flex-shrink:0;transition:all 0.2s;}
+  .step-num.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .step-num.done{background:var(--green-light);color:var(--green);border-color:#86EFAC;font-size:14px;}
+  .step-title{font-size:15px;font-weight:600;color:var(--text);}
+  .step-body{margin-left:38px;}
+  .drop-zone{border:1.5px dashed var(--border-mid);border-radius:var(--radius-lg);padding:2.5rem 2rem;text-align:center;cursor:pointer;transition:all 0.15s;background:var(--surface);}
+  .drop-zone:hover,.drop-zone.over{background:var(--navy-light);border-color:var(--navy-mid);border-style:solid;}
+  .drop-zone.success{background:var(--green-light);border-color:#86EFAC;border-style:solid;cursor:default;}
+  .drop-zone.fail{background:var(--red-light);border-color:var(--red-border);border-style:solid;}
+  .dz-icon{font-size:28px;margin-bottom:8px;}
+  .dz-main{font-size:14px;font-weight:500;color:var(--text-mid);}
+  .dz-sub{font-size:12px;color:var(--text-soft);margin-top:4px;}
+  .dz-link{color:var(--navy-mid);text-decoration:underline;}
+  .dz-success{font-size:14px;font-weight:500;color:var(--green);}
+  .section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-soft);margin-bottom:8px;}
+  .meter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+  .meter-card{border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;cursor:pointer;transition:all 0.15s;background:var(--surface);}
+  .meter-card:hover{border-color:var(--navy-mid);background:var(--navy-light);}
+  .meter-card.sel{border-color:var(--navy-mid);background:var(--navy-light);box-shadow:0 0 0 3px rgba(24,95,165,0.15);}
+  .mc-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-soft);margin-bottom:2px;}
+  .mc-id{font-size:13px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace;}
+  .mc-site{font-size:12px;color:var(--text-mid);margin-top:2px;}
+  .tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;margin-top:6px;}
+  .tag-e{background:var(--navy-light);color:var(--navy-mid);}
+  .tag-g{background:var(--green-light);color:var(--green);}
+  .btn-primary{padding:9px 20px;background:var(--navy);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.15s;}
+  .btn-primary:hover{opacity:0.88;}
+  .btn-block{display:block;width:100%;padding:13px;font-size:14px;}
+  .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:8px;}
+  .summary-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;padding:3px 0;gap:16px;}
+  .sr-label{color:var(--text-soft);flex-shrink:0;}
+  .sr-val{font-weight:500;color:var(--text);text-align:right;}
+  .mono{font-family:'DM Mono',monospace;font-size:12px;}
+  .supplier-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px;}
+  .sc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .sc-name{font-size:13px;font-weight:600;color:var(--text);}
+  .sc-meta{font-size:11px;color:var(--text-soft);font-family:'DM Mono',monospace;}
+  .flag{font-size:11px;padding:3px 9px;border-radius:999px;background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-border);margin-bottom:4px;display:inline-block;margin-right:4px;}
+  .sup-drop{border:1.5px dashed var(--border-mid);border-radius:var(--radius);padding:10px 14px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text-mid);margin-top:6px;}
+  .sup-drop:hover,.sup-drop.over{background:var(--navy-light);border-color:var(--navy-mid);}
+  .sup-drop.success{background:var(--green-light);border-color:#86EFAC;border-style:solid;color:var(--green);cursor:default;}
+  .sup-drop.fail{background:var(--red-light);border-color:var(--red-border);border-style:solid;color:var(--red);cursor:pointer;}
+  .sup-drop-icon{font-size:16px;flex-shrink:0;}
+  .sup-drop-text{flex:1;}
+  .sup-drop-type{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-soft);}
+  .sup-drop.success .sup-drop-type{color:var(--green);opacity:0.7;}
+  .rates-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;}
+  .rate-chip{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;}
+  .rc-label{font-size:10px;color:var(--text-soft);margin-bottom:2px;}
+  .rc-val{font-size:12px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace;}
+  .term-pill{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--navy);color:#fff;margin:6px 4px 4px 0;}
+  hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0;}
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="header-logo">
-    <div class="header-logo-mark"><span>PEP</span></div>
+    <div class="logo-mark">PEP</div>
     <span class="header-title">Quote Tool</span>
   </div>
   <span class="header-date" id="hdr-date"></span>
 </div>
-
 <div class="main">
-
-  <!-- Step 1 -->
-  <div class="step" id="step1">
-    <div class="step-header">
-      <div class="step-num active" id="s1n"><span>1</span></div>
-      <span class="step-title">Upload site list</span>
-    </div>
+  <div class="step">
+    <div class="step-header"><div class="step-num active" id="s1n">1</div><span class="step-title">Upload site list</span></div>
     <div class="step-body">
-      <div class="drop-zone" id="dz-site"
-        ondragover="dzOver(event,'dz-site')" ondragleave="dzLeave(event,'dz-site')" ondrop="dzDrop(event,'dz-site',handleSiteList)"
-        onclick="document.getElementById('inp-site').click()">
+      <div class="drop-zone" id="dz-site" ondragover="dzOver(event,'dz-site')" ondragleave="dzLeave(event,'dz-site')" ondrop="dzDrop(event,'dz-site',handleSiteList)" onclick="document.getElementById('inp-site').click()">
         <div class="dz-icon">📋</div>
         <div class="dz-main">Drop your site list here</div>
         <div class="dz-sub">or <span class="dz-link">browse to upload</span> &nbsp;·&nbsp; .xlsx only</div>
@@ -149,64 +102,46 @@
       <input type="file" id="inp-site" accept=".xlsx" style="display:none" onchange="handleSiteList(this.files[0])">
     </div>
   </div>
-
-  <!-- Step 2 -->
   <div class="step" id="step2" style="display:none">
-    <div class="step-header">
-      <div class="step-num" id="s2n"><span>2</span></div>
-      <span class="step-title">Select meters to price</span>
-    </div>
+    <div class="step-header"><div class="step-num" id="s2n">2</div><span class="step-title">Select meters to price</span></div>
     <div class="step-body">
       <div id="meter-grid"></div>
-      <button class="btn-primary" onclick="confirmMeters()" style="margin-top:4px">Confirm selection →</button>
+      <button class="btn-primary" onclick="confirmMeters()">Confirm selection →</button>
     </div>
   </div>
-
-  <!-- Step 3 -->
   <div class="step" id="step3" style="display:none">
-    <div class="step-header">
-      <div class="step-num" id="s3n"><span>3</span></div>
-      <span class="step-title">Site details</span>
-    </div>
+    <div class="step-header"><div class="step-num" id="s3n">3</div><span class="step-title">Site details</span></div>
     <div class="step-body" id="site-summary"></div>
   </div>
-
-  <!-- Step 4 -->
   <div class="step" id="step4" style="display:none">
-    <div class="step-header">
-      <div class="step-num" id="s4n"><span>4</span></div>
-      <span class="step-title">Upload supplier quotes</span>
-    </div>
+    <div class="step-header"><div class="step-num" id="s4n">4</div><span class="step-title">Upload supplier quotes</span></div>
     <div class="step-body">
       <div id="supplier-cards"></div>
       <hr>
       <button class="btn-primary btn-block" onclick="generateQuote()">Generate quote sheet →</button>
     </div>
   </div>
-
 </div>
-
 <script>
-// ── Date header ──────────────────────────────────────────────────────────────
-(function(){
-  const d=new Date();
-  document.getElementById('hdr-date').textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
-})();
+(()=>{const d=new Date();document.getElementById('hdr-date').textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'});})();
 
-// ── State ────────────────────────────────────────────────────────────────────
-let siteData={}, meters=[], selectedMeters=[], parsedSuppliers={};
+let siteData={},meters=[],selectedMeters=[],parsedSuppliers={};
 
-// ── Config ───────────────────────────────────────────────────────────────────
 const SUPPLIERS=[
-  {name:'Volter',              terms:['12','24'],       accept:'.xlsx',fmt:'volter'},
-  {name:'Marble Power',        terms:['12','24'],       accept:'.xlsx',fmt:'marble'},
-  {name:'npower Business Solutions',terms:['12','24','36'],accept:'.pdf',fmt:'npower'},
-  {name:'Smartest Energy',     terms:['12','24','36'],  accept:'.xlsx',fmt:'smartest'},
-  {name:'EDF Energy',          terms:['12','24','36'],  accept:'.csv', fmt:'edf'},
-  {name:'SSE Energy Solutions',terms:['12','24','36'],  accept:'.pdf', fmt:'sse'},
-  {name:'Crown Gas & Power',   terms:['12','24','36'],  accept:'.xlsx',fmt:'crown'},
+  {name:'British Gas',              terms:['12','24','36'],accept:'.pdf', fmt:'britishgas'},
+  {name:'Dyce Energy',              terms:['12','24','36'],accept:'.xlsx',fmt:'dyce'},
+  {name:'Volter',                   terms:['12','24'],     accept:'.xlsx',fmt:'volter'},
+  {name:'Marble Power',             terms:['12','24'],     accept:'.xlsx',fmt:'marble'},
+  {name:'npower Business Solutions',terms:['12','24','36'],accept:'.pdf', fmt:'npower'},
+  {name:'Smartest Energy',          terms:['12','24','36'],accept:'.xlsx',fmt:'smartest'},
+  {name:'EDF Energy',               terms:['12','24','36'],accept:'.csv', fmt:'edf'},
+  {name:'SSE Energy Solutions',     terms:['12','24','36'],accept:'.pdf', fmt:'sse'},
+  {name:'Crown Gas & Power',        terms:['12','24','36'],accept:'.xlsx',fmt:'crown'},
 ];
+
 const FLAGS={
+  'British Gas':['0.5p/kWh broker commission included in unit rates — flag to client'],
+  'Dyce Energy':['0.5p/kWh unit rate uplift embedded — flag to client'],
   'Volter':['Day/night rates include GMS discount — show pre/post figures to client','Passthroughs: CCL, DUoS Exceeded Capacity, DUoS Reactive Power, Meter Agent Charges'],
   'npower Business Solutions':['0.5p/kWh consultant fee in unit rate — flag to client','Day/night split 06:30–00:30 / 00:30–06:30 — differs from other suppliers'],
   'EDF Energy':['0.5p/kWh consultant uplift (CUP 0.5) — flag to client','Confirm "CT Fully Inclusive" is fixed before presenting'],
@@ -214,7 +149,6 @@ const FLAGS={
   'Smartest Energy':['0.6p/kWh added to day and night rates (excluded charges)','Flag if product is not standard fixed'],
 };
 
-// ── Utilities ────────────────────────────────────────────────────────────────
 const pad=n=>String(n).padStart(2,'0');
 const today=()=>{const d=new Date();return`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;};
 function dateStr(v){
@@ -228,40 +162,21 @@ function dateStr(v){
 const r2=n=>Math.round(Number(n)*100)/100;
 const r4=n=>Math.round(Number(n)*10000)/10000;
 function cv(ws,col,row){const c=ws[XLSX.utils.encode_cell({r:row-1,c:col-1})];return c?c.v:null;}
-function stepMark(id,state){
-  const el=document.getElementById(id);
-  el.className='step-num '+state;
-  el.innerHTML=state==='done'?'':` <span>${el.querySelector('span')?el.querySelector('span').textContent:''}</span>`;
-  if(state==='done')el.innerHTML='';
-  if(state==='done'){el.className='step-num done';}
-}
-function markDone(id){document.getElementById(id).className='step-num done';}
+function markDone(id){const el=document.getElementById(id);el.className='step-num done';el.textContent='✓';}
 function markActive(id){document.getElementById(id).className='step-num active';}
 function show(id){document.getElementById(id).style.display='block';}
-
-// ── Drag/drop ────────────────────────────────────────────────────────────────
 function dzOver(e,id){e.preventDefault();e.stopPropagation();document.getElementById(id).classList.add('over');}
 function dzLeave(e,id){e.preventDefault();document.getElementById(id).classList.remove('over');}
-function dzDrop(e,id,handler){
-  e.preventDefault();e.stopPropagation();
-  document.getElementById(id).classList.remove('over');
-  const f=e.dataTransfer.files[0];if(f)handler(f);
-}
+function dzDrop(e,id,handler){e.preventDefault();e.stopPropagation();document.getElementById(id).classList.remove('over');const f=e.dataTransfer.files[0];if(f)handler(f);}
 
-// ── Step 1: Site list ────────────────────────────────────────────────────────
 function handleSiteList(file){
   if(!file)return;
   const z=document.getElementById('dz-site');
   z.innerHTML=`<div class="dz-icon">⏳</div><div class="dz-main">Parsing ${file.name}...</div>`;
   const r=new FileReader();
   r.onload=e=>{
-    try{
-      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
-      parseSheet(wb.Sheets[wb.SheetNames[0]],file.name);
-    }catch(err){
-      z.className='drop-zone fail';
-      z.innerHTML=`<div class="dz-icon">⚠️</div><div class="dz-fail">Could not parse file — check it is a valid PEP site list (.xlsx)</div>`;
-    }
+    try{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});parseSheet(wb.Sheets[wb.SheetNames[0]],file.name);}
+    catch(err){z.className='drop-zone fail';z.innerHTML=`<div class="dz-icon">⚠️</div><div class="dz-main">Could not parse file — check it is a valid PEP site list</div>`;}
   };
   r.readAsArrayBuffer(file);
 }
@@ -295,11 +210,7 @@ function parseSheet(ws,filename){
       startDate:cv(ws,12,r)||'',endDate:cv(ws,13,r)||'',renewalEnd:cv(ws,14,r)||''});
   }
   const z=document.getElementById('dz-site');
-  if(!meters.length){
-    z.className='drop-zone fail';
-    z.innerHTML=`<div class="dz-icon">⚠️</div><div class="dz-fail">No meters found — check file format</div>`;
-    return;
-  }
+  if(!meters.length){z.className='drop-zone fail';z.innerHTML=`<div class="dz-icon">⚠️</div><div class="dz-main">No meters found — check file format</div>`;return;}
   z.className='drop-zone success';
   z.innerHTML=`<div class="dz-icon">✅</div><div class="dz-success">${filename}</div><div class="dz-sub" style="color:var(--green);opacity:0.8">Found ${meters.length} meter${meters.length!==1?'s':''}</div>`;
   markDone('s1n');markActive('s2n');
@@ -307,44 +218,28 @@ function parseSheet(ws,filename){
   document.getElementById('step2').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-// ── Step 2 ───────────────────────────────────────────────────────────────────
 function buildMeterGrid(){
-  const elec=meters.filter(m=>m.type==='elec');
-  const gas=meters.filter(m=>m.type==='gas');
+  const elec=meters.filter(m=>m.type==='elec'),gas=meters.filter(m=>m.type==='gas');
   let h='';
-  if(elec.length){
-    h+=`<div class="section-label">⚡ Electricity</div><div class="meter-grid">`;
-    elec.forEach(m=>{const i=meters.indexOf(m);h+=mCard(i,m,'MPAN','e');});
-    h+=`</div>`;
-  }
-  if(gas.length){
-    h+=`<div class="section-label">🔥 Gas</div><div class="meter-grid">`;
-    gas.forEach(m=>{const i=meters.indexOf(m);h+=mCard(i,m,'MPR','g');});
-    h+=`</div>`;
-  }
+  if(elec.length){h+=`<div class="section-label">⚡ Electricity</div><div class="meter-grid">`;elec.forEach(m=>{const i=meters.indexOf(m);h+=mCard(i,m,'MPAN','e');});h+=`</div>`;}
+  if(gas.length){h+=`<div class="section-label">🔥 Gas</div><div class="meter-grid">`;gas.forEach(m=>{const i=meters.indexOf(m);h+=mCard(i,m,'MPR','g');});h+=`</div>`;}
   document.getElementById('meter-grid').innerHTML=h;
 }
 function mCard(idx,m,label,type){
   return`<div class="meter-card" id="mc-${idx}" onclick="toggleMeter(${idx})">
-    <div class="mc-label">${label}</div>
-    <div class="mc-id">${m.fullMpan||m.idPrefix}</div>
-    <div class="mc-site">${m.site}</div>
-    <span class="tag tag-${type}">${type==='e'?'Electricity':'Gas'}</span>
+    <div class="mc-label">${label}</div><div class="mc-id">${m.fullMpan||m.idPrefix}</div>
+    <div class="mc-site">${m.site}</div><span class="tag tag-${type}">${type==='e'?'Electricity':'Gas'}</span>
   </div>`;
 }
 function toggleMeter(idx){
-  const c=document.getElementById(`mc-${idx}`);
-  const p=selectedMeters.indexOf(idx);
-  if(p===-1){selectedMeters.push(idx);c.classList.add('sel');}
-  else{selectedMeters.splice(p,1);c.classList.remove('sel');}
+  const c=document.getElementById(`mc-${idx}`),p=selectedMeters.indexOf(idx);
+  if(p===-1){selectedMeters.push(idx);c.classList.add('sel');}else{selectedMeters.splice(p,1);c.classList.remove('sel');}
 }
 
-// ── Step 3 ───────────────────────────────────────────────────────────────────
 function confirmMeters(){
   if(!selectedMeters.length){alert('Please select at least one meter.');return;}
   markDone('s2n');markDone('s3n');markActive('s4n');
-  const elecSel=selectedMeters.filter(i=>meters[i].type==='elec');
-  const tpl=elecSel.length>1?'Multisite':'Single site';
+  const tpl=selectedMeters.filter(i=>meters[i].type==='elec').length>1?'Multisite':'Single site';
   let h=`<div class="summary-card">
     <div class="summary-row"><span class="sr-label">Client</span><span class="sr-val">${siteData.clientName||'Unknown'}</span></div>
     <div class="summary-row"><span class="sr-label">Template</span><span class="sr-val">${tpl} quote</span></div>
@@ -369,26 +264,22 @@ function confirmMeters(){
   document.getElementById('step4').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-// ── Step 4: Supplier cards ───────────────────────────────────────────────────
 function buildSupplierCards(){
   parsedSuppliers={};
   let h='';
   SUPPLIERS.forEach(sup=>{
     const key=sup.name.replace(/[^a-z0-9]/gi,'_');
     const flags=FLAGS[sup.name]||[];
-    const ftypes=sup.accept.replace(/\./g,'').toUpperCase();
+    const ft=sup.accept.replace(/\./g,'').toUpperCase();
     h+=`<div class="supplier-card">
-      <div class="sc-header">
-        <span class="sc-name">${sup.name}</span>
-        <span class="sc-meta">${ftypes} · ${sup.terms.join('m, ')}m</span>
-      </div>`;
+      <div class="sc-header"><span class="sc-name">${sup.name}</span><span class="sc-meta">${ft} · ${sup.terms.join('m, ')}m</span></div>`;
     if(flags.length){flags.forEach(f=>{h+=`<div class="flag">⚠ ${f}</div>`;});h+=`<div style="height:6px"></div>`;}
     h+=`<div class="sup-drop" id="sd-${key}"
         ondragover="sdOver(event,'${key}')" ondragleave="sdLeave(event,'${key}')" ondrop="sdDrop(event,'${key}','${sup.fmt}','${sup.name}')"
         onclick="document.getElementById('si-${key}').click()">
         <span class="sup-drop-icon">📁</span>
         <span class="sup-drop-text">Drop quote file here or <span class="dz-link">browse</span></span>
-        <span class="sup-drop-type">${ftypes}</span>
+        <span class="sup-drop-type">${ft}</span>
       </div>
       <input type="file" id="si-${key}" accept="${sup.accept}" style="display:none" onchange="handleSupFile(this.files[0],'${key}','${sup.fmt}','${sup.name}')">
       <div id="rates-${key}"></div>
@@ -399,32 +290,28 @@ function buildSupplierCards(){
 
 function sdOver(e,k){e.preventDefault();e.stopPropagation();document.getElementById(`sd-${k}`).classList.add('over');}
 function sdLeave(e,k){e.preventDefault();document.getElementById(`sd-${k}`).classList.remove('over');}
-function sdDrop(e,k,fmt,name){
-  e.preventDefault();e.stopPropagation();
-  document.getElementById(`sd-${k}`).classList.remove('over');
-  const f=e.dataTransfer.files[0];if(f)handleSupFile(f,k,fmt,name);
-}
+function sdDrop(e,k,fmt,name){e.preventDefault();e.stopPropagation();document.getElementById(`sd-${k}`).classList.remove('over');const f=e.dataTransfer.files[0];if(f)handleSupFile(f,k,fmt,name);}
 
 function handleSupFile(file,key,fmt,name){
   if(!file)return;
   const sd=document.getElementById(`sd-${key}`);
   sd.innerHTML=`<span class="sup-drop-icon">⏳</span><span class="sup-drop-text">Parsing ${file.name}...</span>`;
-  if(fmt==='npower'||fmt==='sse'){parsePDF(file,key,fmt,name);return;}
+  if(['britishgas','npower','sse'].includes(fmt)){parsePDF(file,key,fmt,name);return;}
   const r=new FileReader();
   r.onload=e=>{
     try{
       let result;
-      if(fmt==='edf'){
-        result=parseEDF(new TextDecoder().decode(new Uint8Array(e.target.result)));
-      } else {
+      if(fmt==='edf'){result=parseEDF(new TextDecoder().decode(new Uint8Array(e.target.result)));}
+      else{
         const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
         if(fmt==='volter')result=parseVolter(wb);
         else if(fmt==='marble')result=parseMarble(wb);
         else if(fmt==='smartest')result=parseSmartestEnergy(wb);
         else if(fmt==='crown')result=parseCrown(wb);
+        else if(fmt==='dyce')result=parseDyce(wb);
       }
       if(result&&Object.keys(result).length){parsedSuppliers[name]=result;showRates(key,result);}
-      else{sdFail(key,'No rates found — check file format');}
+      else sdFail(key,'No rates found — check file format');
     }catch(err){sdFail(key,err.message);}
   };
   r.readAsArrayBuffer(file);
@@ -465,8 +352,7 @@ function parseVolter(wb){
     const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
     let sc,cap,day,night;
     data.forEach(row=>{
-      const a=String(row[0]||'').toLowerCase();
-      const b=Number(row[1]);
+      const a=String(row[0]||'').toLowerCase(),b=Number(row[1]);
       if(a.includes('standing'))sc=r2(b*100);
       if(a.includes('capacity'))cap=r4(b/100*365/12);
       if(a.includes('day')&&!a.includes('night'))day=r2(b);
@@ -498,13 +384,10 @@ function parseMarble(wb){
         if(!dr[scC]&&!dr[dayC])continue;
         let term='12';
         if(startC!==undefined&&endC!==undefined&&dr[startC]&&dr[endC]){
-          const s=new Date(dr[startC]),e=new Date(dr[endC]);
-          const mo=Math.round((e-s)/(1000*60*60*24*30.44));
+          const mo=Math.round((new Date(dr[endC])-new Date(dr[startC]))/(1000*60*60*24*30.44));
           term=String(mo);
         }
-        if(['12','24'].includes(term)){
-          result[term]={sc:r2(dr[scC]),cap:r4(Number(dr[capC])/100*365/12),day:r2(dr[dayC]),night:r2(dr[nightC])};
-        }
+        if(['12','24'].includes(term))result[term]={sc:r2(dr[scC]),cap:r4(Number(dr[capC])/100*365/12),day:r2(dr[dayC]),night:r2(dr[nightC])};
       }
       break;
     }
@@ -517,15 +400,13 @@ function parseSmartestEnergy(wb){
   const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
   let sc,cap,day,night,term='12';
   data.forEach(row=>{
-    const a=String(row[0]||'').toLowerCase();
-    const b=Number(row[1]);
+    const a=String(row[0]||'').toLowerCase(),b=Number(row[1]);
     if(a.includes('standing'))sc=r2(b*100);
     if(a.includes('capacity'))cap=r4(b/100*365/12);
     if(a.includes('day rate'))day=r2(b+0.6);
     if(a.includes('night rate'))night=r2(b+0.6);
     if((a.includes('start date')||a.includes('supply start'))&&row[1]&&row[2]){
-      const s=new Date(row[1]),e=new Date(row[2]);
-      const mo=Math.round((e-s)/(1000*60*60*24*30.44));
+      const mo=Math.round((new Date(row[2])-new Date(row[1]))/(1000*60*60*24*30.44));
       term=String(mo);
     }
   });
@@ -578,10 +459,7 @@ function parseCrown(wb){
         const dr=data[di];
         if(!dr[scC]&&!dr[dayC])continue;
         let term='12';
-        if(dr[startC]&&dr[endC]){
-          const mo=Math.round((new Date(dr[endC])-new Date(dr[startC]))/(1000*60*60*24*30.44));
-          term=String(mo);
-        }
+        if(dr[startC]&&dr[endC]){const mo=Math.round((new Date(dr[endC])-new Date(dr[startC]))/(1000*60*60*24*30.44));term=String(mo);}
         result[term]={sc:r2(Number(dr[scC])*100),cap:r4(Number(dr[capC])),day:r2(Number(dr[dayC])),night:r2(Number(dr[nightC]))};
       }
       break;
@@ -590,16 +468,49 @@ function parseCrown(wb){
   return result;
 }
 
-// PDF via Claude API
+function parseDyce(wb){
+  // Single sheet "HH Quotation", all terms in columns
+  // 12m: O=SC, P=Day, Q=Night, R=KVA  (cols 15,16,17,18 — 1-indexed)
+  // 24m: V=SC, W=Day, X=Night, Y=KVA  (cols 22,23,24,25)
+  // 36m: AC=SC, AD=Day, AE=Night, AF=KVA (cols 29,30,31,32)
+  const ws=wb.Sheets['HH Quotation']||wb.Sheets[wb.SheetNames[0]];
+  const result={};
+  // Data is on row 10 (1-indexed)
+  const dataRow=10;
+  const terms=[
+    {term:'12', scC:15, dayC:16, nightC:17, kvaC:18},
+    {term:'24', scC:22, dayC:23, nightC:24, kvaC:25},
+    {term:'36', scC:29, dayC:30, nightC:31, kvaC:32},
+  ];
+  terms.forEach(({term,scC,dayC,nightC,kvaC})=>{
+    const sc=cv(ws,scC,dataRow);
+    const day=cv(ws,dayC,dataRow);
+    const night=cv(ws,nightC,dataRow);
+    const kva=cv(ws,kvaC,dataRow);
+    // Only include term if it has data
+    if(sc&&day){
+      result[term]={
+        sc:r2(Number(sc)),
+        cap:r4(Number(kva)/100*365/12),
+        day:r2(Number(day)),
+        night:r2(Number(night)),
+      };
+    }
+  });
+  return result;
+}
+
 async function parsePDF(file,key,fmt,name){
   const base64=await new Promise(res=>{
     const r=new FileReader();
     r.onload=e=>res(btoa(String.fromCharCode(...new Uint8Array(e.target.result))));
     r.readAsArrayBuffer(file);
   });
-  const prompt=fmt==='npower'
-    ?`Extract electricity tariff rates from this npower Business Solutions PDF. Return JSON only, no markdown. Format: {"12":{"sc":number,"cap":number,"day":number,"night":number},"24":{...}}. Rules: sc already in p/day. cap in £/day/kVA — convert ×365÷12. Include only terms present in the document.`
-    :`Extract electricity tariff rates from this SSE Energy Solutions PDF. Return JSON only, no markdown. Format: {"12":{"sc":number,"cap":number,"day":number,"night":number},"24":{...},"36":{...}}. Rules: sc already in p/day. cap in p/kVA/day (store as-is). Use gross unit rates — ignore Direct Debit Discount line. Include only terms present.`;
+  const prompts={
+    britishgas:`Extract electricity tariff rates from this British Gas PDF quote. It contains multiple terms (12m, 24m, 36m) each with a separate Site Annexe table. Return JSON only, no markdown. Format: {"12":{"sc":number,"cap":number,"day":number,"night":number},"24":{...},"36":{...}}. Rules: Standing Charge already in p/day — no conversion. Availability Charge in p/kVA/day — convert ÷100×365÷12 to get £/kVA/month for cap value. Day Unit Charge and Night Unit Charge already in p/kWh. Include only terms present in the document.`,
+    npower:`Extract electricity tariff rates from this npower Business Solutions PDF quote. Return JSON only, no markdown. Format: {"12":{"sc":number,"cap":number,"day":number,"night":number},"24":{...},"36":{...}}. Rules: SC already in p/day. Capacity in £/day/kVA — convert ×365÷12 for cap value. Include only terms present.`,
+    sse:`Extract electricity tariff rates from this SSE Energy Solutions PDF quote. Return JSON only, no markdown. Format: {"12":{"sc":number,"cap":number,"day":number,"night":number},"24":{...},"36":{...}}. Rules: SC already in p/day. Capacity in p/kVA/day — store as-is for cap value. Use gross unit rates — ignore Direct Debit Discount line. Include only terms present.`,
+  };
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
@@ -607,7 +518,7 @@ async function parsePDF(file,key,fmt,name){
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
         messages:[{role:'user',content:[
           {type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},
-          {type:'text',text:prompt}
+          {type:'text',text:prompts[fmt]}
         ]}]})
     });
     const data=await resp.json();
@@ -618,7 +529,6 @@ async function parsePDF(file,key,fmt,name){
   }catch(err){sdFail(key,'PDF parse failed: '+err.message);}
 }
 
-// ── Generate ─────────────────────────────────────────────────────────────────
 function generateQuote(){
   const lines=[`Today's date: ${today()}`,`Client: ${siteData.clientName||'Unknown'}`,''];
   const elecSel=selectedMeters.filter(i=>meters[i].type==='elec');
@@ -650,15 +560,12 @@ function generateQuote(){
     });
   });
   if(!any)lines.push('  (no supplier quotes uploaded yet)');
-  // Copy to clipboard and alert
   const output=lines.join('\n');
   navigator.clipboard.writeText(output).then(()=>{
-    alert('Quote data copied to clipboard! Paste it into your Claude chat to generate the Excel file.');
+    alert('Quote data copied to clipboard!\n\nPaste it into your Claude chat to generate the Excel file.');
   }).catch(()=>{
-    const ta=document.createElement('textarea');
-    ta.value=output;document.body.appendChild(ta);ta.select();
-    document.execCommand('copy');document.body.removeChild(ta);
-    alert('Quote data copied to clipboard! Paste it into your Claude chat to generate the Excel file.');
+    const ta=document.createElement('textarea');ta.value=output;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    alert('Quote data copied to clipboard!\n\nPaste it into your Claude chat to generate the Excel file.');
   });
 }
 </script>
