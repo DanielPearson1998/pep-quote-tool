@@ -122,7 +122,7 @@
 
 let siteData={},meters=[],selectedMeters=[],parsedSuppliers={};
 
-const PROXY_URL = 'https://pep-quote-proxy.onrender.com'; // e.g. https://pep-quote-proxy.onrender.com
+const PROXY_URL = 'YOUR_PROXY_URL_HERE'; // e.g. https://pep-quote-proxy.onrender.com
 
 const SUPPLIERS=[
   {name:'British Gas',              terms:['12','24','36'],accept:'.pdf', fmt:'britishgas'},
@@ -265,9 +265,9 @@ function buildSupplierCards(){
       <div class="sup-hdr"><span class="sup-name">${sup.name}</span><span class="sup-meta">${ft} · ${sup.terms.join('m, ')}m</span></div>`;
     if(flags.length){flags.forEach(f=>{h+=`<div class="flag">⚠ ${f}</div>`;});h+=`<div style="height:5px"></div>`;}
     h+=`<div class="sup-drop" id="sd-${key}" ondragover="sdOver(event,'${key}')" ondragleave="sdLeave(event,'${key}')" ondrop="sdDrop(event,'${key}','${sup.fmt}','${sup.name}')" onclick="document.getElementById('si-${key}').click()">
-        <span class="sdi">📁</span><span class="sdt">Drop quote file here or <span class="dz-link">browse</span></span><span class="sdtype">${ft}</span>
+        <span class="sdi">📁</span><span class="sdt">Drop quote file(s) here or <span class="dz-link">browse</span> — drop one per term</span><span class="sdtype">${ft}</span>
       </div>
-      <input type="file" id="si-${key}" accept="${sup.accept}" style="display:none" onchange="handleSupFile(this.files[0],'${key}','${sup.fmt}','${sup.name}')">
+      <input type="file" id="si-${key}" accept="${sup.accept}" style="display:none" multiple onchange="handleSupFiles(this.files,'${key}','${sup.fmt}','${sup.name}')">
       <div id="rates-${key}"></div>
     </div>`;
   });
@@ -276,30 +276,47 @@ function buildSupplierCards(){
 
 function sdOver(e,k){e.preventDefault();e.stopPropagation();document.getElementById(`sd-${k}`).classList.add('over');}
 function sdLeave(e,k){e.preventDefault();document.getElementById(`sd-${k}`).classList.remove('over');}
-function sdDrop(e,k,fmt,name){e.preventDefault();e.stopPropagation();document.getElementById(`sd-${k}`).classList.remove('over');const f=e.dataTransfer.files[0];if(f)handleSupFile(f,k,fmt,name);}
+function sdDrop(e,k,fmt,name){e.preventDefault();e.stopPropagation();document.getElementById(`sd-${k}`).classList.remove('over');const files=e.dataTransfer.files;if(files&&files.length)handleSupFiles(files,k,fmt,name);}
+
+function handleSupFiles(files,key,fmt,name){
+  if(!files||!files.length)return;
+  const sd=document.getElementById(`sd-${key}`);
+  sd.innerHTML=`<span class="sdi">⏳</span><span class="sdt">Parsing ${files.length} file${files.length>1?'s':''}...</span>`;
+  // For PDF suppliers process sequentially
+  if(['britishgas','npower','sse'].includes(fmt)){
+    // PDFs are single-file multi-term, just use first file
+    parsePDF(files[0],key,fmt,name);return;
+  }
+  // For xlsx/csv: parse each file and merge results
+  const allResults={};
+  let remaining=files.length;
+  Array.from(files).forEach(file=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      try{
+        let result;
+        if(fmt==='edf'){result=parseEDF(new TextDecoder().decode(new Uint8Array(e.target.result)));}
+        else{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+          if(fmt==='volter')result=parseVolter(wb);
+          else if(fmt==='marble')result=parseMarble(wb);
+          else if(fmt==='smartest')result=parseSmartestEnergy(wb);
+          else if(fmt==='crown')result=parseCrown(wb);
+          else if(fmt==='dyce')result=parseDyce(wb);
+        }
+        if(result)Object.assign(allResults,result);
+      }catch(err){console.error('Parse error:',err);}
+      remaining--;
+      if(remaining===0){
+        if(Object.keys(allResults).length){parsedSuppliers[name]=allResults;showRates(key,allResults);}
+        else sdFail(key,'No rates found — check file format');
+      }
+    };
+    r.readAsArrayBuffer(file);
+  });
+}
 
 function handleSupFile(file,key,fmt,name){
-  if(!file)return;
-  const sd=document.getElementById(`sd-${key}`);
-  sd.innerHTML=`<span class="sdi">⏳</span><span class="sdt">Parsing ${file.name}...</span>`;
-  if(['britishgas','npower','sse'].includes(fmt)){parsePDF(file,key,fmt,name);return;}
-  const r=new FileReader();
-  r.onload=e=>{
-    try{
-      let result;
-      if(fmt==='edf'){result=parseEDF(new TextDecoder().decode(new Uint8Array(e.target.result)));}
-      else{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
-        if(fmt==='volter')result=parseVolter(wb);
-        else if(fmt==='marble')result=parseMarble(wb);
-        else if(fmt==='smartest')result=parseSmartestEnergy(wb);
-        else if(fmt==='crown')result=parseCrown(wb);
-        else if(fmt==='dyce')result=parseDyce(wb);
-      }
-      if(result&&Object.keys(result).length){parsedSuppliers[name]=result;showRates(key,result);}
-      else sdFail(key,'No rates found — check file format');
-    }catch(err){sdFail(key,err.message);}
-  };
-  r.readAsArrayBuffer(file);
+  handleSupFiles([file],key,fmt,name);
 }
 
 function sdFail(key,msg){const sd=document.getElementById(`sd-${key}`);sd.className='sup-drop fail';sd.innerHTML=`<span class="sdi">⚠️</span><span class="sdt">${msg} — click to retry</span>`;}
